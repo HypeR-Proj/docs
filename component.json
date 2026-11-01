@@ -1,0 +1,16 @@
+{
+  "SPDX-FileCopyrightText": "2026 roolrz",
+  "SPDX-License-Identifier": "Apache-2.0",
+  "version": 1,
+  "name": "docs",
+  "kind": "tooling",
+  "config": null,
+  "test_requires_rust": false,
+  "tests_need_workspace": false,
+  "tests": [
+    [
+      "python3",
+      "{component}/tools/test.py"
+    ]
+  ]
+}
