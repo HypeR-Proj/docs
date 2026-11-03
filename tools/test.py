@@ -34,3 +34,12 @@ with tempfile.TemporaryDirectory(prefix='candidate-site-', dir=environment.paren
     subprocess.run([str(python), str(root / 'tools/build.py'), '--root', str(root),
                     '--repository', 'docs', '--revision', 'validation-only',
                     '--output', str(Path(temporary) / 'output')], check=True)
+    # Browser tooling belongs to this module's acceptance test, not the shared
+    # rendering requirements installed by every repository's publication job.
+    subprocess.run([str(python), '-m', 'pip', 'install', '--disable-pip-version-check',
+                    '-r', str(root / 'tools/browser-requirements.txt')], check=True)
+    browser_env = {**os.environ, 'PLAYWRIGHT_BROWSERS_PATH': str(environment.parent / 'browsers')}
+    subprocess.run([str(python), '-m', 'playwright', 'install', 'chromium', '--only-shell'],
+                   env=browser_env, check=True)
+    subprocess.run([str(python), str(root / 'tools/check-offline-diagrams.py'),
+                    str(Path(temporary) / 'output/site')], env=browser_env, check=True)

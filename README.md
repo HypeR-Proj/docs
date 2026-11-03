@@ -20,3 +20,9 @@ python3 tools/build.py --root /path/to/repository --repository example --output 
 The output must be a new directory. System build entries use OUT/docs; standalone
 invocations select their output explicitly. CI publishes each repository after
 main merges using `.github/actions/documentation`.
+
+Run `python3 tools/test.py` for module validation. It creates an isolated Python
+environment under `OUT` (default `out/`), downloads a pinned Chromium test runtime
+on first use and renders the generated site's diagrams with networking disabled.
+Ordinary site builds need only `tools/requirements.txt`; the browser is a test
+dependency. See [diagrams](docs/diagrams.md) for syntax and offline rendering.

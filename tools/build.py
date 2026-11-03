@@ -46,6 +46,9 @@ def build(root, output, repository, revision=None):
     tools = Path(__file__).resolve().parent
     (source / '_docs_assets').mkdir()
     shutil.copyfile(tools / 'mermaid.js', source / '_docs_assets/mermaid.js')
+    renderer = tools.parent / 'third_party/mermaid'
+    shutil.copyfile(renderer / 'mermaid.min.js', source / '_docs_assets/mermaid.min.js')
+    shutil.copyfile(renderer / 'LICENSE', source / '_docs_assets/mermaid.LICENSE')
     settings = {'repository': repository, 'revision': revision, 'files': files,
                 'pages': mapping, 'assets': assets}
     (output / 'sources.json').write_text(json.dumps(settings))
@@ -60,7 +63,7 @@ def build(root, output, repository, revision=None):
         'theme': {'name': 'readthedocs'}, 'plugins': ['search'],
         'hooks': [str(tools / 'repository_site.py')],
         'markdown_extensions': ['tables', 'fenced_code', 'toc', 'pymdownx.tasklist'],
-        'extra_javascript': ['https://cdn.jsdelivr.net/npm/mermaid@11.12.0/dist/mermaid.min.js', '_docs_assets/mermaid.js'],
+        'extra_javascript': ['_docs_assets/mermaid.min.js', '_docs_assets/mermaid.js'],
         'validation': {'links': {'not_found': 'warn', 'anchors': 'warn', 'unrecognized_links': 'warn'}},
         'extra': {'source_inventory': str(output / 'sources.json')},
     }
