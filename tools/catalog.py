@@ -33,7 +33,7 @@ def render(root, filename, metadata):
                 raise ValueError('invalid or duplicate catalog repository')
             projects[name] = str(local(project.get('path', name)))
         for include in tree.findall('include'):
-            read(str(local(filename).parent / local(include.attrib['name'])))
+            read(str(local(include.attrib['name'])))
         visited.remove(path.resolve())
 
     read(filename)

@@ -44,3 +44,35 @@ Choose a fresh output directory. The builder checks generated HTML links and
 anchors before the site is uploaded. The shared action is provided by `docs`;
 `ci` owns the reusable GitHub Actions workflow. Each repository controls when to
 invoke it through its own `.github/workflows/publish-docs.yml`.
+
+## Navigation and catalog includes
+
+Pages use their first level-one heading as the default navigation title, with
+inline formatting removed. The root README is shown as Overview. Without a
+heading, the filename supplies the title and preserves technical capitalization.
+Default navigation places Overview first, then technical pages in source-path
+order, followed by contribution, conduct, security, license and changelog guides.
+
+A module can set `documentation.nav` in `component.json` to choose titles, order
+and groups. Entries use original source paths; the builder handles README's
+published rename. Pages omitted from this list are appended with default titles.
+Only selected published pages can appear, and a page may appear only once:
+
+```json
+{
+  "documentation": {
+    "nav": [
+      {"Introduction": "README.md"},
+      {"Architecture": [
+        {"I/O isolation": "docs/io-isolation.md"},
+        {"SMMUv3": "docs/smmuv3.md"}
+      ]}
+    ]
+  }
+}
+```
+
+The manifest catalog resolves every XML `include` name from the manifest
+repository root, including includes nested inside subdirectories. This matches
+`repo` and the build reader; a child file does not change the include base.
+Includes must remain inside the repository and cannot form a cycle.
