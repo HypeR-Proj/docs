@@ -25,4 +25,5 @@ runs:
         REPOSITORY: ${{ github.event.repository.name }}
       run: |
         python3 -m unittest discover -s "$ACTION_PATH/../../../tools" -p 'test_*.py'
+        python3 "$ACTION_PATH/../../../tools/check-source.py" "$GITHUB_WORKSPACE"
         python3 "$ACTION_PATH/../../../tools/build.py" --root "$GITHUB_WORKSPACE" --output "$OUTPUT" --repository "$REPOSITORY"

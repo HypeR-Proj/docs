@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 import venv
 
 root = Path(__file__).resolve().parents[1]
@@ -26,3 +27,10 @@ if not stamp.is_file() or stamp.read_text() != identity:
     stamp.write_text(identity)
 subprocess.run([str(python), '-B', '-m', 'unittest', 'discover', '-s', str(root / 'tools'),
                 '-p', 'test_*.py'], check=True)
+subprocess.run([str(python), str(root / 'tools/check-source.py'), str(root)], check=True)
+# This disposable smoke site also runs in generated build views without Git;
+# its synthetic source revision is never published by the documentation action.
+with tempfile.TemporaryDirectory(prefix='candidate-site-', dir=environment.parent) as temporary:
+    subprocess.run([str(python), str(root / 'tools/build.py'), '--root', str(root),
+                    '--repository', 'docs', '--revision', 'validation-only',
+                    '--output', str(Path(temporary) / 'output')], check=True)

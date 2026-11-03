@@ -16,6 +16,7 @@ import yaml
 
 from check_links import check_site
 from catalog import render as catalog
+from inventory import description, published_pages, source_files
 
 
 def build(root, output, repository, revision=None):
@@ -24,23 +25,9 @@ def build(root, output, repository, revision=None):
         raise ValueError('documentation output must not contain the repository')
     if output.exists():
         raise ValueError(f'output already exists: {output}')
-    tracked = subprocess.check_output(['git', 'ls-files', '-z', '--cached', '--others', '--exclude-standard'], cwd=root, text=True).split('\0')
-    files = sorted(name for name in set(tracked) if name and (root / name).is_file()
-                   and not any(part.startswith('.') for part in Path(name).parts)
-                   and not name.startswith(('legacy/', 'third_party/')))
-    pages = [name for name in files if name.endswith('.md')]
-    metadata = root / 'component.json'
-    description = json.loads(metadata.read_text()) if metadata.is_file() else {}
-    if metadata.is_file():
-        selected = description.get('documentation', {}).get('pages')
-        if selected is not None:
-            if (not isinstance(selected, list) or any(not isinstance(name, str) for name in selected)
-                    or len(selected) != len(set(selected))
-                    or any(name not in pages for name in selected)):
-                raise ValueError('documentation.pages must select unique tracked Markdown files')
-            pages = selected
-    if 'README.md' not in pages:
-        raise ValueError('the documentation entry point must be README.md')
+    files = source_files(root)
+    metadata = description(root)
+    pages = published_pages(files, metadata)
     revision = revision or subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
     source = output / 'source'
     source.mkdir(parents=True)
@@ -50,10 +37,10 @@ def build(root, output, repository, revision=None):
         destination = source / mapping.get(name, name)
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(root / name, destination)
-    if manifest := description.get('documentation', {}).get('catalog'):
+    if manifest := metadata.get('documentation', {}).get('catalog'):
         if 'modules.md' in mapping:
             raise ValueError('modules.md is reserved for the generated documentation catalog')
-        (source / 'modules.md').write_text(catalog(root, manifest, description))
+        (source / 'modules.md').write_text(catalog(root, manifest, metadata))
         mapping['modules.md'] = 'modules.md'
     tools = Path(__file__).resolve().parent
     (source / '_docs_assets').mkdir()

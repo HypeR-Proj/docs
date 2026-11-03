@@ -4,25 +4,19 @@
 
 """Check local Markdown file links without the site-building dependencies."""
 
-import json
 from pathlib import Path
 import re
-import subprocess
 import sys
 from urllib.parse import unquote, urlsplit
+from inventory import description, published_pages, source_files
 
 def owned_pages(root):
-    if (root / '.git').exists():
-        paths = subprocess.check_output(['git', 'ls-files', '-z', '--cached', '--others', '--exclude-standard'],
-                                        cwd=root, text=True).split('\0')
-        return [root / path for path in sorted(set(paths)) if path.endswith('.md') and (root / path).is_file()]
-    return [path for path in root.rglob('*.md') if not any(
-        part in ('out', 'target', '.git', '.repo', '.venv', '.agent') for part in path.relative_to(root).parts)]
+    return [root / path for path in published_pages(source_files(root), description(root))]
 
 
 def check(root):
     root = Path(root).resolve()
-    metadata = json.loads((root / 'component.json').read_text())
+    metadata = description(root)
     generated = {'modules.md'} if metadata.get('documentation', {}).get('catalog') else set()
     for source in owned_pages(root):
         content = re.sub(r'^```[^\n]*\n.*?^```\s*$', '', source.read_text(), flags=re.M | re.S)
