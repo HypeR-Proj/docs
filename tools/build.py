@@ -17,6 +17,7 @@ import yaml
 from check_links import check_site
 from catalog import render as catalog
 from inventory import description, published_pages, source_files
+from navigation import navigation
 
 
 def build(root, output, repository, revision=None):
@@ -50,6 +51,7 @@ def build(root, output, repository, revision=None):
     (output / 'sources.json').write_text(json.dumps(settings))
     config = {
         'site_name': repository + ' documentation',
+        'nav': navigation(source, mapping, metadata),
         'site_url': f'https://hyper-proj.github.io/{repository}/',
         'repo_url': f'https://github.com/HypeR-Proj/{repository}',
         'edit_uri': '',  # Pages are staged and README files are renamed.
